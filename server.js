@@ -25,6 +25,22 @@ app.get('/api/workouts',async (req, res) => {
     res.json(result.rows)
 })
 
+app.delete('/api/workouts/:id', async(req, res) => {
+    const {id} = req.params
+    const result = await pool.query("delete from workouts where id = $1 returning *", [id])
+    res.json(result.rows[0])
+})
+
+app.put('/api/workouts/:id', async(req, res) => {
+    const { id } = req.params
+    const { exercise, sets, reps, weight } = req.body
+    const result = await pool.query(
+        "update workouts set exercise=$1, sets=$2, reps=$3, weight=$4 where id=$5 returning *",
+        [exercise, sets, reps, weight, id]
+    )
+    res.json(result.rows[0])
+})
+
 
 app.listen(3000, () => {
     console.log("Server running")
