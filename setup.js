@@ -11,6 +11,8 @@ const setup = async () => {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `)
+  
+  await pool.query("")
 
   console.log("Table created")
   pool.end()
