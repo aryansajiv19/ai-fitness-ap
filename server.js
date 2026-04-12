@@ -6,7 +6,7 @@ const app = express()
 app.use(express.json())
 
 app.get('/api/server', (req, res) => {
-        res.json({ status: "ok" })
+    res.json({ status: "ok" })
 })
 
 
@@ -20,18 +20,18 @@ app.post('/api/workouts', async (req, res) => {
     res.json(result.rows[0])
 })
 
-app.get('/api/workouts',async (req, res) => {
+app.get('/api/workouts', async (req, res) => {
     const result = await pool.query("select * from workouts")
     res.json(result.rows)
 })
 
-app.delete('/api/workouts/:id', async(req, res) => {
-    const {id} = req.params
+app.delete('/api/workouts/:id', async (req, res) => {
+    const { id } = req.params
     const result = await pool.query("delete from workouts where id = $1 returning *", [id])
     res.json(result.rows[0])
 })
 
-app.put('/api/workouts/:id', async(req, res) => {
+app.put('/api/workouts/:id', async (req, res) => {
     const { id } = req.params
     const { exercise, sets, reps, weight } = req.body
     const result = await pool.query(
@@ -41,8 +41,7 @@ app.put('/api/workouts/:id', async(req, res) => {
     res.json(result.rows[0])
 })
 
-
 app.listen(3000, () => {
     console.log("Server running")
-  })
+})
 

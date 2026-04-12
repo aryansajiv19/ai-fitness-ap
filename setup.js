@@ -12,7 +12,14 @@ const setup = async () => {
     );
   `)
   
-  await pool.query("")
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      email VARCHAR(255) UNIQUE,
+      password_hash VARCHAR(255),
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `)
 
   console.log("Table created")
   pool.end()
