@@ -1,5 +1,6 @@
 const express = require("express")
 const pool = require('./db')
+const authRoutes = require("./auth")
 
 const app = express()
 
@@ -40,6 +41,9 @@ app.put('/api/workouts/:id', async (req, res) => {
     )
     res.json(result.rows[0])
 })
+
+
+app.use("/api/auth", authRoutes)
 
 app.listen(3000, () => {
     console.log("Server running")
