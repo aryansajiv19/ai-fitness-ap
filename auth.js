@@ -32,7 +32,7 @@ router.post("/login", async (req, res) => {
         return res.status(401).json({error: "Wrong password"})
     }
 
-    const token = jwt.sign({userId: user.id}, "your-secret-key-change-this-later")
+    const token = jwt.sign({userId: user.id}, process.env.JWT_SECRET)
     res.json({token, userId: user.id})
 
 
