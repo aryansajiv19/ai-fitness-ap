@@ -21,6 +21,14 @@ const setup = async () => {
     )
   `)
 
+  await pool.query(`
+    ALTER TABLE workouts ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id)
+  `)
+
+  await pool.query(`
+    ALTER TABLE workouts ADD COLUMN IF NOT EXISTS muscle_group VARCHAR(50)
+  `)
+
   console.log("Table created")
   pool.end()
 }
