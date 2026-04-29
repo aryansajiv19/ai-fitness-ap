@@ -1,4 +1,4 @@
-# AI Fitness App
+# ASCEND
 
 A workout tracking backend designed as the foundation for an AI-powered training coach. Users log lifts, the system learns their patterns, and an LLM layer (in progress) generates adaptive programming based on history, fatigue, and goals.
 
