@@ -5,6 +5,7 @@ const authRoutes = require("./auth")
 const recoveryRoutes = require("./recovery")
 const auth = require("./middleware")
 const challengeRoutes = require("./challenges")
+const leaderboardRoutes = require("./leaderboard")
 
 const app = express()
 
@@ -61,6 +62,7 @@ app.put('/api/workouts/:id', auth, async (req, res) => {
 app.use("/api/auth", authRoutes)
 app.use("/api/recovery", recoveryRoutes)
 app.use("/api/challenges", challengeRoutes)
+app.use("/api/leaderboard", leaderboardRoutes)
 
 app.listen(3000, () => {
     console.log("Server running")

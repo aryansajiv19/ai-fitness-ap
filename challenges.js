@@ -19,4 +19,13 @@ router.get("/", auth, async (req, res) => {
     res.json(result.rows)
 })
 
+router.post("/:id/join", auth, async (req, res) => {
+    const { id } = req.params
+    const result = await pool.query(
+        "INSERT INTO challenge_participants (challenge_id, user_id) VALUES ($1, $2) RETURNING *",
+        [id, req.userId]
+    )
+    res.json(result.rows[0])
+})
+
 module.exports = router
