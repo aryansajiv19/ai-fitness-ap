@@ -1,94 +1,110 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { api } from '../lib/api'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 
 export default function Auth() {
-  const [mode, setMode] = useState('login')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const [mode, setMode] = useState('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   async function submit(e) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
       if (mode === 'login') {
-        const data = await api.login(email, password)
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('userId', data.userId)
-        navigate('/')
+        const data = await api.login(email, password);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('ascend_user', JSON.stringify({
+          email,
+          userId: data.userId,
+          username: email.split('@')[0],
+          streak: 0,
+        }));
+        navigate('/dashboard');
       } else {
-        await api.signup(email, password)
-        setMode('login')
-        setError('Account created — sign in below')
+        await api.signup(email, password);
+        setMode('login');
+        setError('Account created — sign in below');
       }
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-black tracking-tight" style={{ color: '#ff6500' }}>ASCEND</h1>
-          <p className="text-zinc-500 mt-2 text-sm">Your AI-powered training coach</p>
-        </div>
+    <>
+      <div className="ambient">
+        <div className="glow g1" />
+        <div className="glow g2" />
+      </div>
+      <div className="grain">
+        <svg xmlns="http://www.w3.org/2000/svg">
+          <filter id="grain-filter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+            <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#grain-filter)" />
+        </svg>
+      </div>
 
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-8">
-          <div className="flex gap-2 mb-6">
-            {['login', 'signup'].map(m => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
-                  mode === m
-                    ? 'text-black font-semibold'
-                    : 'text-zinc-500 hover:text-white bg-transparent'
-                }`}
-                style={mode === m ? { backgroundColor: '#ff6500' } : {}}
-              >
-                {m}
-              </button>
-            ))}
+      <div style={{ position: 'relative', zIndex: 10, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="auth-wrap page-enter">
+          <div className="auth-mark">ASCEND<span className="dot">.</span></div>
+          <div className="auth-deck">Your AI-powered training coach.</div>
+
+          <div className="auth-tabs">
+            <button
+              className={`auth-tab${mode === 'login' ? ' active' : ''}`}
+              onClick={() => { setMode('login'); setError(''); }}
+            >
+              Sign In
+            </button>
+            <button
+              className={`auth-tab${mode === 'signup' ? ' active' : ''}`}
+              onClick={() => { setMode('signup'); setError(''); }}
+            >
+              Create Account
+            </button>
           </div>
 
-          <form onSubmit={submit} className="flex flex-col gap-4">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 transition-colors"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 transition-colors"
-            />
+          <form onSubmit={submit}>
+            <div className="field">
+              <label>Email</label>
+              <input
+                type="email"
+                placeholder="you@somewhere.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="field">
+              <label>Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
             {error && (
-              <p className={`text-sm ${error.includes('created') ? 'text-[#ff6500]' : 'text-red-400'}`}>{error}</p>
+              <p className={error.includes('created') ? 'success-msg' : 'error-msg'}>{error}</p>
             )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-black text-sm transition-opacity disabled:opacity-50"
-              style={{ backgroundColor: '#ff6500' }}
-            >
-              {loading ? '...' : mode === 'login' ? 'Sign in' : 'Create account'}
+
+            <button type="submit" className="btn" disabled={loading}>
+              {loading ? 'Please wait…' : 'Continue'}
             </button>
           </form>
         </div>
       </div>
-    </div>
-  )
+    </>
+  );
 }

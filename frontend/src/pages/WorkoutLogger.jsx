@@ -1,164 +1,190 @@
-import React, { useState } from 'react'
-import { api } from '../lib/api'
+import { useState } from 'react';
+import { api } from '../lib/api';
 
-const MUSCLES = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core']
+const MUSCLES = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Legs', 'Core'];
 
 export default function WorkoutLogger() {
-  const [form, setForm] = useState({ exercise: '', sets: '', reps: '', weight: '', muscle_group: 'chest' })
-  const [voice, setVoice] = useState('')
-  const [tab, setTab] = useState('manual')
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState('')
-  const [error, setError] = useState('')
-  const [parsed, setParsed] = useState(null)
+  const [tab, setTab] = useState('manual');
+  const [form, setForm] = useState({ exercise: '', sets: '', reps: '', weight: '' });
+  const [muscle, setMuscle] = useState('Chest');
+  const [voice, setVoice] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [parsed, setParsed] = useState(null);
+
+  function clearStatus() { setSuccess(''); setError(''); }
 
   async function submitManual(e) {
-    e.preventDefault()
-    setError(''); setSuccess(''); setLoading(true)
+    e.preventDefault();
+    clearStatus(); setLoading(true);
     try {
       await api.createWorkout({
         exercise: form.exercise,
         sets: parseInt(form.sets),
         reps: parseInt(form.reps),
         weight: parseFloat(form.weight),
-        muscle_group: form.muscle_group
-      })
-      setSuccess('Workout logged!')
-      setForm({ exercise: '', sets: '', reps: '', weight: '', muscle_group: 'chest' })
+        muscle_group: muscle.toLowerCase(),
+      });
+      setSuccess('Workout logged successfully.');
+      setForm({ exercise: '', sets: '', reps: '', weight: '' });
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function submitVoice(e) {
-    e.preventDefault()
-    setError(''); setSuccess(''); setParsed(null); setLoading(true)
+    e.preventDefault();
+    clearStatus(); setParsed(null); setLoading(true);
     try {
-      const data = await api.voiceLog(voice)
-      setParsed(data.parsed)
-      setSuccess('Workout parsed and logged!')
-      setVoice('')
+      const data = await api.voiceLog(voice);
+      setParsed(data.parsed);
+      setSuccess('Workout parsed and logged.');
+      setVoice('');
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Log Workout</h1>
-        <p className="text-zinc-500 text-sm mt-1">Manual entry or natural language</p>
+    <div className="page-enter">
+      <div className="page-head">
+        <div>
+          <div className="page-eyebrow"><span className="num">02</span>Log Workout</div>
+          <h1 className="page-title">What did you <em>move?</em></h1>
+        </div>
+        <div className="page-aside">Manual or natural language</div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        {['manual', 'voice'].map(t => (
+      <div className="form-wrap">
+        <div className="log-tabs">
           <button
-            key={t}
-            onClick={() => { setTab(t); setError(''); setSuccess('') }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
-              tab === t ? 'text-black' : 'text-zinc-400 bg-white/5 hover:text-white'
-            }`}
-            style={tab === t ? { backgroundColor: '#ff6500' } : {}}
+            className={`log-tab${tab === 'manual' ? ' active' : ''}`}
+            onClick={() => { setTab('manual'); clearStatus(); }}
           >
-            {t === 'voice' ? '🎙 Voice / Text' : '📝 Manual'}
+            Manual
           </button>
-        ))}
-      </div>
+          <button
+            className={`log-tab${tab === 'voice' ? ' active' : ''}`}
+            onClick={() => { setTab('voice'); clearStatus(); }}
+          >
+            Voice / Text
+          </button>
+        </div>
 
-      <div className="bg-[#111] border border-white/5 rounded-2xl p-6">
         {tab === 'manual' ? (
-          <form onSubmit={submitManual} className="flex flex-col gap-4">
-            <div>
-              <label className="text-xs text-zinc-500 mb-1 block">Exercise</label>
+          <form onSubmit={submitManual}>
+            <div className="field">
+              <label>Exercise</label>
               <input
+                type="text"
+                placeholder="e.g. Bench Press"
                 value={form.exercise}
                 onChange={e => setForm(f => ({ ...f, exercise: e.target.value }))}
-                placeholder="e.g. Bench Press"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50"
               />
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {['sets', 'reps', 'weight'].map(field => (
-                <div key={field}>
-                  <label className="text-xs text-zinc-500 mb-1 block capitalize">{field}{field === 'weight' ? ' (kg)' : ''}</label>
-                  <input
-                    type="number"
-                    value={form[field]}
-                    onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))}
-                    required
-                    min="0"
-                    step={field === 'weight' ? '0.5' : '1'}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-[#ff6500]/50"
-                  />
-                </div>
-              ))}
+            <div className="grid-3">
+              <div className="field">
+                <label>Sets</label>
+                <input
+                  type="number"
+                  placeholder="5"
+                  min="1"
+                  value={form.sets}
+                  onChange={e => setForm(f => ({ ...f, sets: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label>Reps</label>
+                <input
+                  type="number"
+                  placeholder="5"
+                  min="1"
+                  value={form.reps}
+                  onChange={e => setForm(f => ({ ...f, reps: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label>Weight (kg)</label>
+                <input
+                  type="number"
+                  placeholder="82.5"
+                  min="0"
+                  step="0.5"
+                  value={form.weight}
+                  onChange={e => setForm(f => ({ ...f, weight: e.target.value }))}
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-xs text-zinc-500 mb-1 block">Muscle Group</label>
-              <select
-                value={form.muscle_group}
-                onChange={e => setForm(f => ({ ...f, muscle_group: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6500]/50"
-              >
-                {MUSCLES.map(m => <option key={m} value={m} className="bg-[#111] capitalize">{m}</option>)}
-              </select>
+            <div className="field">
+              <label>Muscle Group</label>
+              <div className="mg-chips">
+                {MUSCLES.map(m => (
+                  <button
+                    key={m}
+                    type="button"
+                    className={`mg-chip${muscle === m ? ' active' : ''}`}
+                    onClick={() => setMuscle(m)}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-            {success && <p className="text-[#ff6500] text-sm">{success}</p>}
-            <button
-              type="submit"
-              disabled={loading}
-              className="py-3 rounded-xl font-semibold text-black text-sm disabled:opacity-50"
-              style={{ backgroundColor: '#ff6500' }}
-            >
-              {loading ? 'Logging...' : 'Log Workout'}
+
+            {error && <p className="error-msg">{error}</p>}
+            {success && <p className="success-msg">{success}</p>}
+
+            <button type="submit" className="btn" disabled={loading}>
+              {loading ? 'Logging…' : 'Log Workout'}
             </button>
           </form>
         ) : (
-          <form onSubmit={submitVoice} className="flex flex-col gap-4">
-            <div>
-              <label className="text-xs text-zinc-500 mb-1 block">Describe your workout</label>
+          <form onSubmit={submitVoice}>
+            <div className="field">
+              <label>Describe your workout</label>
               <textarea
+                rows={4}
+                placeholder={'"bench press 3 sets of 10 at 80 kilos" or "squatted 100kg for 5x5"'}
                 value={voice}
                 onChange={e => setVoice(e.target.value)}
-                placeholder='e.g. "bench press 3 sets of 10 at 80 kilos" or "squatted 100kg for 5x5"'
                 required
-                rows={4}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 resize-none"
               />
             </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-            {success && <p className="text-[#ff6500] text-sm">{success}</p>}
+
+            <div style={{ fontFamily: 'var(--mono)', fontSize: '10px', color: 'var(--fg-dim)', letterSpacing: '.16em', textTransform: 'uppercase', marginBottom: '16px' }}>
+              ▸ Parsed by Claude Sonnet 4
+            </div>
+
+            {error && <p className="error-msg">{error}</p>}
+            {success && <p className="success-msg">{success}</p>}
+
             {parsed && (
-              <div className="bg-white/5 rounded-xl p-4 text-sm">
-                <p className="text-zinc-400 mb-2 text-xs uppercase tracking-wider">Parsed as:</p>
-                <div className="grid grid-cols-2 gap-1">
-                  {Object.entries(parsed).map(([k, v]) => (
-                    <div key={k} className="flex gap-2">
-                      <span className="text-zinc-500 capitalize">{k}:</span>
-                      <span className="text-white font-medium">{String(v)}</span>
-                    </div>
-                  ))}
-                </div>
+              <div className="parsed-result">
+                <div className="pr-label">Parsed as</div>
+                {Object.entries(parsed).map(([k, v]) => (
+                  <div key={k} className="pr-item">
+                    <span className="pr-key">{k}:</span>
+                    <span className="pr-val">{String(v)}</span>
+                  </div>
+                ))}
               </div>
             )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="py-3 rounded-xl font-semibold text-black text-sm disabled:opacity-50"
-              style={{ backgroundColor: '#ff6500' }}
-            >
-              {loading ? 'Parsing with AI...' : '🤖 Parse & Log'}
+
+            <button type="submit" className="btn" disabled={loading}>
+              {loading ? 'Parsing with AI…' : 'Parse & Log'}
             </button>
           </form>
         )}
       </div>
     </div>
-  )
+  );
 }

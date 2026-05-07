@@ -1,137 +1,153 @@
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { api } from '../lib/api'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { api } from '../lib/api';
 
-const MUSCLES = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core']
+const MUSCLES = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core'];
 
-function RecoveryBar({ muscle, pct }) {
-  const color = pct >= 70 ? '#ff6500' : pct >= 40 ? '#facc15' : '#ef4444'
-  return (
-    <div>
-      <div className="flex justify-between text-xs mb-1">
-        <span className="capitalize text-zinc-400">{muscle}</span>
-        <span style={{ color }}>{pct}%</span>
-      </div>
-      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
-      </div>
-    </div>
-  )
+function swatchColor(pct) {
+  if (pct >= 70) return '#ff6500';
+  if (pct >= 40) return '#facc15';
+  return '#ef4444';
 }
 
-function StatCard({ label, value, sub }) {
-  return (
-    <div className="bg-[#111] border border-white/5 rounded-2xl p-5">
-      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      {sub && <p className="text-xs text-zinc-600 mt-1">{sub}</p>}
-    </div>
-  )
+function AnimatedCount({ target, format = 'compact' }) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    const dur = 1400;
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const e = 1 - Math.pow(1 - t, 3);
+      const v = target * e;
+      setVal(format === 'int' ? Math.round(v) : Math.round(v));
+      if (t < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }, [target]);
+  return format === 'compact'
+    ? <>{val.toLocaleString('en-US')}</>
+    : <>{Math.round(val)}</>;
 }
 
 export default function Dashboard() {
-  const [workouts, setWorkouts] = useState([])
-  const [recovery, setRecovery] = useState({})
-  const [loading, setLoading] = useState(true)
+  const [workouts, setWorkouts] = useState([]);
+  const [recovery, setRecovery] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([api.getWorkouts(), api.getRecovery()])
-      .then(([w, r]) => { setWorkouts(w); setRecovery(r) })
-      .finally(() => setLoading(false))
-  }, [])
+      .then(([w, r]) => { setWorkouts(w); setRecovery(r); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
-  const totalVolume = workouts.reduce((s, w) => s + w.sets * w.reps * w.weight, 0)
+  if (loading) return (
+    <div className="loading-center"><div className="spin" /></div>
+  );
+
+  const totalVolume = workouts.reduce((s, w) => s + w.sets * w.reps * Number(w.weight), 0);
+  const weekSessions = workouts.filter(w => new Date(w.created_at) > new Date(Date.now() - 7 * 86400000)).length;
+  const prWeight = workouts.length ? Math.max(...workouts.map(w => Number(w.weight))) : 0;
   const avgRecovery = MUSCLES.length
-    ? Math.round(MUSCLES.reduce((s, m) => s + (recovery[m] || 0), 0) / MUSCLES.length)
-    : 0
+    ? Math.round(MUSCLES.reduce((s, m) => s + (recovery[m] || 100), 0) / MUSCLES.length)
+    : 100;
 
-  const chartData = workouts.slice(0, 10).reverse().map(w => ({
-    name: w.exercise?.slice(0, 8),
-    volume: w.sets * w.reps * w.weight
-  }))
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-6 h-6 border-2 border-[#ff6500] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+  const recList = MUSCLES
+    .map(m => ({ name: m, pct: Math.round(recovery[m] ?? 100) }))
+    .sort((a, b) => b.pct - a.pct);
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' });
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-zinc-500 text-sm mt-1">Here's how you're doing</p>
+    <div className="page-enter">
+      <div className="page-head">
+        <div>
+          <div className="page-eyebrow"><span className="num">01</span>Dashboard</div>
+          <h1 className="page-title">Here's how you're <em>doing.</em></h1>
+        </div>
+        <div className="page-aside">{today}</div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Total Workouts" value={workouts.length} />
-        <StatCard label="Total Volume" value={`${(totalVolume / 1000).toFixed(1)}t`} sub="kg lifted" />
-        <StatCard label="Avg Recovery" value={`${avgRecovery}%`} />
-        <StatCard label="This Week" value={workouts.filter(w => new Date(w.created_at) > new Date(Date.now() - 7 * 86400000)).length} sub="sessions" />
+      <div className="stats-row">
+        <div className="stat">
+          <div className="lbl">Best Lift · PR</div>
+          <div className="val">
+            <AnimatedCount target={prWeight} /><span className="unit">KG</span>
+          </div>
+          <div className="delta"><span className="arrow">↗</span>All-time personal record</div>
+        </div>
+        <div className="stat">
+          <div className="lbl">Total Volume · Lifetime</div>
+          <div className="val">
+            <AnimatedCount target={Math.round(totalVolume)} /><span className="unit">KG</span>
+          </div>
+          <div className="delta"><span className="arrow">↗</span>Across {workouts.length} sessions</div>
+        </div>
+        <div className="stat">
+          <div className="lbl">Sessions · This Week</div>
+          <div className="val">
+            <AnimatedCount target={weekSessions} format="int" /><span className="frac">/{weekSessions + 1}</span>
+          </div>
+          <div className="delta"><span className="arrow">↗</span>Keep the streak going</div>
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 mb-8">
-        {/* Volume chart */}
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Recent Volume</h2>
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={chartData}>
-                <XAxis dataKey="name" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis hide />
-                <Tooltip
-                  contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8 }}
-                  labelStyle={{ color: '#fff' }}
-                  itemStyle={{ color: '#ff6500' }}
-                />
-                <Bar dataKey="volume" fill="#ff6500" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      <div className="dash-grid">
+        <div>
+          <div className="sub-title">Recent <em>sessions.</em></div>
+          {workouts.length === 0 ? (
+            <div className="empty-state">
+              No workouts yet. <Link to="/log" style={{ color: 'var(--accent)' }}>Log your first one.</Link>
+            </div>
           ) : (
-            <p className="text-zinc-600 text-sm text-center py-10">Log workouts to see your volume chart</p>
+            <div className="workout-list">
+              {workouts.slice(0, 5).map((w, i) => (
+                <div key={w.id} className="wo">
+                  <div className="wo-num">{String(workouts.length - i).padStart(2, '0')}</div>
+                  <div>
+                    <div className="wo-name" style={{ textTransform: 'capitalize' }}>{w.exercise}</div>
+                    <div className="wo-detail">
+                      {w.sets}×{w.reps} <span className="sep">·</span> {w.weight}KG
+                    </div>
+                    <div className="wo-tag">▸ {(w.muscle_group || '').toUpperCase()}</div>
+                  </div>
+                  <div className="wo-meta">
+                    <div className="vol">{(w.sets * w.reps * Number(w.weight)).toLocaleString()} kg</div>
+                    <div className="date">{formatDate(w.created_at)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Recovery */}
-        <div className="bg-[#111] border border-white/5 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Muscle Recovery</h2>
-          <div className="flex flex-col gap-3">
-            {MUSCLES.map(m => (
-              <RecoveryBar key={m} muscle={m} pct={recovery[m] ?? 100} />
-            ))}
+        <div>
+          <div className="sub-title">Muscle <em>recovery.</em></div>
+          <div className="rec-list">
+            {recList.map(({ name, pct }) => {
+              const color = swatchColor(pct);
+              return (
+                <div key={name} className="rec-row">
+                  <span className="rec-swatch" style={{ background: color, color }} />
+                  <span className="rec-name">{name}</span>
+                  <span className="rec-pct" style={{ color }}>{pct}%</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="rec-bar">
+            <div className="lbl">Composite Readiness</div>
+            <div className="composite">
+              <AnimatedCount target={avgRecovery} format="int" /><span className="of">/100</span>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Recent workouts */}
-      <div className="bg-[#111] border border-white/5 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-white">Recent Workouts</h2>
-          <Link to="/log" className="text-xs text-[#ff6500] hover:underline">+ Log new</Link>
-        </div>
-        {workouts.length === 0 ? (
-          <p className="text-zinc-600 text-sm text-center py-6">No workouts yet. <Link to="/log" className="text-[#ff6500]">Log your first one.</Link></p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {workouts.slice(0, 6).map(w => (
-              <div key={w.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-                <div>
-                  <p className="text-sm text-white font-medium capitalize">{w.exercise}</p>
-                  <p className="text-xs text-zinc-500 capitalize">{w.muscle_group}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-white">{w.sets}×{w.reps} @ {w.weight}kg</p>
-                  <p className="text-xs text-zinc-600">{new Date(w.created_at).toLocaleDateString()}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
-  )
+  );
 }

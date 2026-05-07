@@ -1,113 +1,132 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { chatStream } from '../lib/api'
+import { useState, useRef, useEffect } from 'react';
+import { chatStream } from '../lib/api';
+
+const SUGGESTIONS = [
+  'What should I train today?',
+  'How is my chest recovery?',
+  'Give me an overload tip',
+  'Analyze my recent workouts',
+];
+
+function now() {
+  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', text: 'Hey! I\'m your ASCEND AI coach. I have access to your workout history and recovery data. Ask me anything about your training.' }
-  ])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const bottomRef = useRef(null)
+    {
+      role: 'assistant',
+      text: "I have your workout history and recovery data loaded. Ask me anything about your training.",
+      time: now(),
+    },
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const threadRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    if (threadRef.current) {
+      threadRef.current.scrollTop = threadRef.current.scrollHeight;
+    }
+  }, [messages]);
 
-  async function send(e) {
-    e.preventDefault()
-    if (!input.trim() || loading) return
-    const userMsg = input.trim()
-    setInput('')
-    setMessages(m => [...m, { role: 'user', text: userMsg }])
-    setLoading(true)
+  async function send(text) {
+    const userMsg = (text || input).trim();
+    if (!userMsg || loading) return;
+    setInput('');
+    setMessages(m => [...m, { role: 'user', text: userMsg, time: now() }]);
+    setLoading(true);
 
-    let aiText = ''
-    setMessages(m => [...m, { role: 'assistant', text: '', streaming: true }])
+    let aiText = '';
+    const t = now();
+    setMessages(m => [...m, { role: 'assistant', text: '', time: t, streaming: true }]);
 
     try {
       await chatStream(
         userMsg,
         (chunk) => {
-          aiText += chunk
-          setMessages(m => m.map((msg, i) => i === m.length - 1 ? { ...msg, text: aiText } : msg))
+          aiText += chunk;
+          setMessages(m => m.map((msg, i) => i === m.length - 1 ? { ...msg, text: aiText } : msg));
         },
         () => {
-          setMessages(m => m.map((msg, i) => i === m.length - 1 ? { ...msg, streaming: false } : msg))
-          setLoading(false)
+          setMessages(m => m.map((msg, i) => i === m.length - 1 ? { ...msg, streaming: false } : msg));
+          setLoading(false);
         }
-      )
-    } catch (err) {
-      setMessages(m => m.map((msg, i) => i === m.length - 1 ? { role: 'assistant', text: 'Sorry, something went wrong.', streaming: false } : msg))
-      setLoading(false)
+      );
+    } catch {
+      setMessages(m => m.map((msg, i) => i === m.length - 1
+        ? { role: 'assistant', text: 'Something went wrong. Please try again.', time: t, streaming: false }
+        : msg));
+      setLoading(false);
     }
   }
 
-  const suggestions = [
-    'What should I train today?',
-    'How is my chest recovery?',
-    'Give me a progressive overload tip',
-    'Analyze my recent workouts'
-  ]
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  }
+
+  const showSuggestions = messages.length <= 1;
 
   return (
-    <div className="flex flex-col h-full max-w-3xl mx-auto">
-      <div className="p-6 border-b border-white/5">
-        <h1 className="text-2xl font-bold text-white">AI Coach</h1>
-        <p className="text-zinc-500 text-sm mt-1">Powered by Claude — knows your history</p>
+    <div className="page-enter" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div className="page-head" style={{ marginBottom: '24px' }}>
+        <div>
+          <div className="page-eyebrow"><span className="num">03</span>AI Coach</div>
+          <h1 className="page-title">Speak with <em>Claude.</em></h1>
+        </div>
+        <div className="page-aside">Sonnet 4 · knows your history</div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                msg.role === 'user'
-                  ? 'text-black font-medium'
-                  : 'bg-[#111] border border-white/5 text-zinc-200'
-              }`}
-              style={msg.role === 'user' ? { backgroundColor: '#ff6500' } : {}}
-            >
-              {msg.text || (msg.streaming ? <span className="animate-pulse">▋</span> : '')}
-            </div>
+      <div className="chat-shell" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {showSuggestions && (
+          <div className="suggestions">
+            {SUGGESTIONS.map(s => (
+              <button key={s} className="sugg" onClick={() => send(s)}>{s}</button>
+            ))}
           </div>
-        ))}
-        <div ref={bottomRef} />
-      </div>
+        )}
 
-      {/* Suggestions */}
-      {messages.length <= 1 && (
-        <div className="px-6 pb-2 flex flex-wrap gap-2">
-          {suggestions.map(s => (
-            <button
-              key={s}
-              onClick={() => setInput(s)}
-              className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-zinc-400 hover:text-white hover:border-[#ff6500]/30 transition-colors"
+        <div
+          className="chat-thread"
+          ref={threadRef}
+          style={{ flex: 1, overflowY: 'auto', maxHeight: 'calc(100vh - 360px)' }}
+        >
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`msg ${msg.role === 'user' ? 'user' : 'coach'}${msg.streaming ? ' streaming' : ''}`}
+              style={{ animationDelay: `${i * 0.05}s` }}
             >
-              {s}
-            </button>
+              <div className="msg-meta">
+                {msg.role === 'assistant' && <span className="dot" />}
+                {msg.role === 'assistant' ? `Coach · ${msg.time}` : `You · ${msg.time}`}
+                {msg.role === 'user' && <span className="dot" />}
+              </div>
+              <div
+                className="msg-body"
+                dangerouslySetInnerHTML={{
+                  __html: (msg.text || '').replace(
+                    /\*\*(.*?)\*\*/g,
+                    '<em>$1</em>'
+                  ),
+                }}
+              />
+            </div>
           ))}
         </div>
-      )}
 
-      {/* Input */}
-      <form onSubmit={send} className="p-4 border-t border-white/5 flex gap-3">
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Ask your coach anything..."
-          disabled={loading}
-          className="flex-1 bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={loading || !input.trim()}
-          className="px-5 py-3 rounded-xl font-semibold text-black text-sm disabled:opacity-40 transition-opacity"
-          style={{ backgroundColor: '#ff6500' }}
-        >
-          {loading ? '...' : 'Send'}
-        </button>
-      </form>
+        <div className="chat-input">
+          <span className="prompt">›</span>
+          <input
+            type="text"
+            placeholder="Ask about your programming, fatigue, or anything else…"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            disabled={loading}
+          />
+        </div>
+      </div>
     </div>
-  )
+  );
 }

@@ -1,85 +1,125 @@
-import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { api } from '../lib/api'
-import { io } from 'socket.io-client'
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { api } from '../lib/api';
+import { io } from 'socket.io-client';
 
 export default function LeaderboardPage() {
-  const { id } = useParams()
-  const [leaderboard, setLeaderboard] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [lastUpdate, setLastUpdate] = useState(null)
+  const { id } = useParams();
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [challengeId, setChallengeId] = useState(id || null);
+  const [challenges, setChallenges] = useState([]);
+
+  const myEmail = (() => {
+    try { return JSON.parse(localStorage.getItem('ascend_user') || '{}').email || ''; } catch { return ''; }
+  })();
 
   useEffect(() => {
-    api.getLeaderboard(id).then(setLeaderboard).finally(() => setLoading(false))
-
-    const socket = io({ path: '/socket.io' })
-    socket.emit('join_challenge', id)
-    socket.on('leaderboard_update', (data) => {
-      if (String(data.challengeId) === String(id)) {
-        setLeaderboard(data.leaderboard)
-        setLastUpdate(new Date())
-      }
-    })
-    return () => {
-      socket.emit('leave_challenge', id)
-      socket.disconnect()
+    if (!id) {
+      api.getChallenges()
+        .then(cs => {
+          setChallenges(cs);
+          if (cs.length > 0) setChallengeId(String(cs[0].id));
+        })
+        .catch(() => {});
     }
-  }, [id])
+  }, [id]);
 
-  const medal = ['🥇', '🥈', '🥉']
+  useEffect(() => {
+    if (!challengeId) { setLoading(false); return; }
+    setLoading(true);
+    api.getLeaderboard(challengeId)
+      .then(data => { setLeaderboard(data); setLastUpdate(new Date()); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-full">
-      <div className="w-6 h-6 border-2 border-[#ff6500] border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
+    const socket = io({ path: '/socket.io' });
+    socket.emit('join_challenge', challengeId);
+    socket.on('leaderboard_update', (data) => {
+      if (String(data.challengeId) === String(challengeId)) {
+        setLeaderboard(data.leaderboard);
+        setLastUpdate(new Date());
+      }
+    });
+    return () => {
+      socket.emit('leave_challenge', challengeId);
+      socket.disconnect();
+    };
+  }, [challengeId]);
+
+  if (loading) return <div className="loading-center"><div className="spin" /></div>;
+
+  const updateTime = lastUpdate
+    ? lastUpdate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+    : '';
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <div className="mb-8">
-        <Link to="/challenges" className="text-zinc-500 text-sm hover:text-white mb-2 inline-block">← Challenges</Link>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-[#ff6500] rounded-full animate-pulse" />
-            <span className="text-xs text-zinc-500">Live</span>
-          </div>
+    <div className="page-enter">
+      <div className="page-head">
+        <div>
+          {id && (
+            <div style={{ marginBottom: 12 }}>
+              <Link to="/challenges" style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--fg-dim)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                ← Challenges
+              </Link>
+            </div>
+          )}
+          <div className="page-eyebrow"><span className="num">05</span>Leaderboard</div>
+          <h1 className="page-title">The <em>standings.</em></h1>
         </div>
-        {lastUpdate && (
-          <p className="text-xs text-zinc-600 mt-1">Updated {lastUpdate.toLocaleTimeString()}</p>
-        )}
+        <div className="live-pill">
+          <span className="live-dot" />
+          Live{updateTime ? ` · updated ${updateTime}` : ''}
+        </div>
       </div>
 
-      {leaderboard.length === 0 ? (
-        <div className="text-center py-16 text-zinc-600">
-          <p className="text-4xl mb-3">🏆</p>
-          <p>No participants yet. Join and log workouts to appear here!</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {leaderboard.map((entry, i) => (
-            <div
-              key={entry.user_id}
-              className={`bg-[#111] border rounded-2xl p-5 flex items-center gap-4 ${
-                i === 0 ? 'border-[#ff6500]/30' : 'border-white/5'
-              }`}
+      {!id && challenges.length > 1 && (
+        <div className="ex-tabs" style={{ marginBottom: 32 }}>
+          {challenges.map(c => (
+            <button
+              key={c.id}
+              className={`ex-tab${String(c.id) === challengeId ? ' active' : ''}`}
+              onClick={() => setChallengeId(String(c.id))}
             >
-              <div className="text-2xl w-8 text-center">{medal[i] || `${i + 1}`}</div>
-              <div className="flex-1">
-                <p className="text-white font-medium">{entry.email}</p>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  Best: {entry.best_weight}kg &nbsp;·&nbsp; Volume: {Number(entry.total_volume).toLocaleString()}kg
-                </p>
-              </div>
-              {i === 0 && (
-                <div className="text-xs font-bold px-2 py-1 rounded-full text-black" style={{ backgroundColor: '#ff6500' }}>
-                  #1
-                </div>
-              )}
-            </div>
+              {c.name}
+            </button>
           ))}
         </div>
       )}
+
+      {leaderboard.length === 0 ? (
+        <div className="empty-state">
+          {challengeId ? 'No participants yet. Join a challenge and log workouts to appear here.' : 'No challenges found. Create one first.'}
+        </div>
+      ) : (
+        <div className="lb-list">
+          {leaderboard.map((entry, i) => {
+            const isMe = entry.email === myEmail;
+            const rankStr = String(i + 1).padStart(2, '0');
+            return (
+              <div key={entry.user_id} className={`lb-row${i === 0 ? ' top' : ''}`}>
+                <div className="lb-rank">{rankStr}</div>
+                <div>
+                  <div className="lb-name">
+                    {entry.email?.split('@')[0] || 'Unknown'}
+                    {isMe && (
+                      <span style={{ color: 'var(--accent)', fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.18em', marginLeft: 10 }}>YOU</span>
+                    )}
+                  </div>
+                  <div className="lb-sub">{entry.email}</div>
+                </div>
+                <div className="lb-vol">
+                  {Number(entry.total_volume || 0).toLocaleString()} kg
+                </div>
+                <div className="lb-best">
+                  Best · {entry.best_weight || 0} kg
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
-  )
+  );
 }

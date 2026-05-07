@@ -12,7 +12,8 @@ A full-stack AI-powered fitness tracking app — users log workouts, get AI coac
 ## Stack
 
 - **Backend**: Node.js 20, Express 5, socket.io, @anthropic-ai/sdk
-- **Frontend**: React 18, Vite, Tailwind CSS, Recharts, socket.io-client, React Router v6
+- **Frontend**: React 18, Vite, Tailwind CSS (utility fallback only), socket.io-client, React Router v6
+- **Fonts**: DM Sans (headings/body), JetBrains Mono (labels/monospace) via Google Fonts
 - **DB**: PostgreSQL via `pg` (Replit managed)
 - **Auth**: JWT + bcrypt
 
@@ -27,9 +28,10 @@ A full-stack AI-powered fitness tracking app — users log workouts, get AI coac
 - `db.js` — pg Pool using DATABASE_URL
 - `setup.js` — idempotent schema bootstrap
 - `frontend/` — Vite React app
-  - `src/pages/` — Auth, Dashboard, WorkoutLogger, ChatPage, Challenges, LeaderboardPage
-  - `src/components/Layout.jsx` — sidebar nav
+  - `src/pages/` — Auth, Dashboard, WorkoutLogger, ChatPage, Challenges, LeaderboardPage, Progress
+  - `src/components/Layout.jsx` — sidebar nav with cursor glow + ambient effects
   - `src/lib/api.js` — typed fetch wrapper + chatStream SSE helper
+  - `src/index.css` — full design system (CSS vars, animations, all component classes)
 
 ## Architecture decisions
 
@@ -38,26 +40,31 @@ A full-stack AI-powered fitness tracking app — users log workouts, get AI coac
 - Claude Sonnet 4 for both AI chat (streaming SSE) and voice NLP parsing
 - All workout queries filter by user_id at SQL layer
 - Vite proxy `/api` and `/socket.io` to localhost:3000 — no CORS config needed in dev
-- Text search via PostgreSQL ILIKE (no pgvector needed for MVP)
+- Design system is pure CSS (not Tailwind) — CSS custom properties in `index.css` mirror the Claude Design HTML exactly
 
 ## Product
 
-- Signup/login with JWT
-- Log workouts manually or via natural language ("bench 3x10 at 80kg")
+- Signup/login with JWT (token in localStorage as `'token'`, user meta as `'ascend_user'`)
+- Log workouts manually (exercise + sets/reps/weight + muscle chip selector) or via natural language
 - Recovery tracker (fatigue model per muscle group, 7-day window)
-- AI coaching chat with Claude (streaming, uses workout history as context)
-- Challenges: create, join, view live leaderboard (WebSocket real-time updates)
+- AI coaching chat with Claude (streaming SSE, bold markdown → `<em>` highlight)
+- Challenges: create, join, progress bars, avatar stacks, live leaderboard (WebSocket real-time)
+- Progress: animated SVG line chart, PR detection, PR timeline
 
 ## User preferences
 
-- Anthropic only (no OpenAI) — MVP simplicity
-- Dark theme, lime accent (#c8ff2e)
+- Design from Claude Design HTML: black bg (#000), DM Sans + JetBrains Mono, orange accent (#ff6500)
+- Dark editorial aesthetic: 64px page titles, numbered monospace nav, animated logo letter-drop
+- Ambient orange glow blobs, film grain overlay, cursor glow
+- Anthropic only (no OpenAI)
 
 ## Gotchas
 
 - `setup.js` calls `pool.end()` — never require() it from server.js
 - Frontend on port 5000 (webview), backend on port 3000 (console)
 - socket.io path proxied through Vite: `/socket.io` → `localhost:3000`
+- Auth stores user in `'ascend_user'` JSON key; JWT in `'token'`
+- React Router v6 future flag warnings are cosmetic
 
 ## Pointers
 

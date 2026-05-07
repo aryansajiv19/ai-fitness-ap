@@ -1,60 +1,108 @@
-import React from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useRef } from 'react';
+import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 
-const LIME = '#ff6500'
+const NAV = [
+  { num: '01', label: 'Dashboard', to: '/dashboard' },
+  { num: '02', label: 'Log Workout', to: '/log' },
+  { num: '03', label: 'AI Coach', to: '/chat' },
+  { num: '04', label: 'Challenges', to: '/challenges' },
+  { num: '05', label: 'Leaderboard', to: '/leaderboard' },
+  { num: '06', label: 'Progress', to: '/progress' },
+];
 
 export default function Layout() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const glowRef = useRef(null);
+  const animRef = useRef(null);
+  const mouse = useRef({ x: 0, y: 0 });
+  const cur = useRef({ x: 0, y: 0 });
 
-  function logout() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('userId')
-    navigate('/auth')
+  const user = (() => {
+    try { return JSON.parse(localStorage.getItem('ascend_user') || '{}'); } catch { return {}; }
+  })();
+
+  const email = user.email || '';
+  const initials = email ? email.slice(0, 2).toUpperCase() : 'ME';
+  const displayName = user.username || email.split('@')[0] || 'You';
+  const streak = user.streak || 0;
+
+  useEffect(() => {
+    const onMove = (e) => { mouse.current.x = e.clientX; mouse.current.y = e.clientY; };
+    document.addEventListener('mousemove', onMove);
+    function loop() {
+      cur.current.x += (mouse.current.x - cur.current.x) * 0.08;
+      cur.current.y += (mouse.current.y - cur.current.y) * 0.08;
+      if (glowRef.current) {
+        glowRef.current.style.left = cur.current.x + 'px';
+        glowRef.current.style.top = cur.current.y + 'px';
+      }
+      animRef.current = requestAnimationFrame(loop);
+    }
+    loop();
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(animRef.current);
+    };
+  }, []);
+
+  function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('ascend_user');
+    navigate('/auth');
   }
 
-  const linkClass = ({ isActive }) =>
-    `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-      isActive ? 'text-[#ff6500] bg-[#ff6500]/10' : 'text-zinc-400 hover:text-white hover:bg-white/5'
-    }`
-
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-56 flex-shrink-0 bg-[#111] border-r border-white/5 flex flex-col py-6 px-3">
-        <div className="mb-8 px-2">
-          <span className="text-xl font-black tracking-tight" style={{ color: LIME }}>ASCEND</span>
-        </div>
-        <nav className="flex flex-col gap-1">
-          <NavLink to="/" end className={linkClass}>
-            <span>⚡</span> Dashboard
-          </NavLink>
-          <NavLink to="/log" className={linkClass}>
-            <span>💪</span> Log Workout
-          </NavLink>
-          <NavLink to="/chat" className={linkClass}>
-            <span>🤖</span> AI Coach
-          </NavLink>
-          <NavLink to="/challenges" className={linkClass}>
-            <span>🏆</span> Challenges
-          </NavLink>
-          <NavLink to="/progress" className={linkClass}>
-            <span>📈</span> Progress
-          </NavLink>
-        </nav>
-        <div className="mt-auto">
-          <button
-            onClick={logout}
-            className="w-full text-left px-3 py-2 text-sm text-zinc-500 hover:text-white transition-colors rounded-lg hover:bg-white/5"
-          >
-            Sign out
-          </button>
-        </div>
-      </aside>
+    <>
+      <div className="ambient">
+        <div className="glow g1" />
+        <div className="glow g2" />
+      </div>
+      <div className="cursor-glow" ref={glowRef} />
+      <div className="grain">
+        <svg xmlns="http://www.w3.org/2000/svg">
+          <filter id="grain-filter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+            <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#grain-filter)" />
+        </svg>
+      </div>
 
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto bg-[#0a0a0a]">
-        <Outlet />
-      </main>
-    </div>
-  )
+      <div className="app">
+        <aside className="nav">
+          <div className="nav-mark">
+            {'ASCEND'.split('').map((ch, i) => <span key={i} className="ch">{ch}</span>)}
+            <span className="dot">.</span>
+          </div>
+
+          <nav className="nav-list">
+            {NAV.map(({ num, label, to }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+              >
+                <span className="num">{num}</span>
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="nav-foot">
+            <div className="nav-user" style={{ cursor: 'pointer' }} onClick={handleLogout} title="Click to sign out">
+              <div className="nav-avatar">{initials}</div>
+              <div className="meta">
+                <div className="name">{displayName}</div>
+                <div className="streak"><b>●</b> {streak}-day streak</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main className="canvas">
+          <Outlet />
+        </main>
+      </div>
+    </>
+  );
 }
