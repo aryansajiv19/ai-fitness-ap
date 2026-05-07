@@ -1,7 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../lib/api';
 
 const MUSCLES = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Legs', 'Core'];
+
+function useDebounce(value, delay) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
 
 export default function WorkoutLogger() {
   const [tab, setTab] = useState('manual');
@@ -12,6 +21,21 @@ export default function WorkoutLogger() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [parsed, setParsed] = useState(null);
+
+  // Search state
+  const [searchQ, setSearchQ] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const debouncedQ = useDebounce(searchQ, 350);
+
+  useEffect(() => {
+    if (!debouncedQ.trim()) { setSearchResults([]); return; }
+    setSearchLoading(true);
+    api.semanticSearch(debouncedQ)
+      .then(r => setSearchResults(r))
+      .catch(() => setSearchResults([]))
+      .finally(() => setSearchLoading(false));
+  }, [debouncedQ]);
 
   function clearStatus() { setSuccess(''); setError(''); }
 
@@ -58,6 +82,49 @@ export default function WorkoutLogger() {
           <h1 className="page-title">What did you <em>move?</em></h1>
         </div>
         <div className="page-aside">Manual or natural language</div>
+      </div>
+
+      {/* Search bar */}
+      <div className="search-wrap">
+        <div className="search-field">
+          <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search past workouts — e.g. bench press, legs…"
+            value={searchQ}
+            onChange={e => setSearchQ(e.target.value)}
+          />
+          {searchQ && (
+            <button className="search-clear" onClick={() => { setSearchQ(''); setSearchResults([]); }}>✕</button>
+          )}
+        </div>
+
+        {(searchResults.length > 0 || (searchQ && !searchLoading)) && (
+          <div className="search-results">
+            {searchLoading && (
+              <div className="search-empty">Searching…</div>
+            )}
+            {!searchLoading && searchResults.length === 0 && searchQ && (
+              <div className="search-empty">No workouts found for "{searchQ}"</div>
+            )}
+            {searchResults.map(w => (
+              <div key={w.id} className="search-row">
+                <div className="search-exercise">{w.exercise}</div>
+                <div className="search-meta">
+                  <span className="search-chip">{w.muscle_group}</span>
+                  <span className="search-stat">{w.sets}×{w.reps}</span>
+                  {w.weight > 0 && <span className="search-stat">{w.weight} kg</span>}
+                  <span className="search-date">
+                    {new Date(w.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="form-wrap">

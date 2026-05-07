@@ -10,6 +10,7 @@ const challengeRoutes = require("./challenges")
 const leaderboardRoutes = require("./leaderboard")
 const chatRoutes = require("./chat")
 const voiceRoutes = require("./voice")
+const searchRouter = require("./embeddings")
 
 const app = express()
 const server = http.createServer(app)
@@ -104,6 +105,7 @@ app.use("/api/challenges", challengeRoutes)
 app.use("/api/leaderboard", leaderboardRoutes)
 app.use("/api/chat", chatRoutes)
 app.use("/api/workouts/voice", voiceRoutes)
+app.use("/api/workouts", searchRouter)
 
 // WebSocket room management
 io.on("connection", (socket) => {

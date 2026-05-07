@@ -36,7 +36,12 @@ export const api = {
   deleteWorkout: (id) =>
     request(`/workouts/${id}`, { method: 'DELETE' }),
 
+  // Simple ILIKE search
   searchWorkouts: (q) => request(`/workouts/search?q=${encodeURIComponent(q)}`),
+
+  // Full-text ranked search (PostgreSQL tsvector)
+  semanticSearch: (query) =>
+    request('/workouts/semantic-search', { method: 'POST', body: JSON.stringify({ query }) }),
 
   getRecovery: () => request('/recovery'),
 
