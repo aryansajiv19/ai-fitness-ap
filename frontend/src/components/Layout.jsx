@@ -37,6 +37,9 @@ export default function Layout() {
           <NavLink to="/challenges" className={linkClass}>
             <span>🏆</span> Challenges
           </NavLink>
+          <NavLink to="/progress" className={linkClass}>
+            <span>📈</span> Progress
+          </NavLink>
         </nav>
         <div className="mt-auto">
           <button

@@ -6,6 +6,7 @@ import WorkoutLogger from './pages/WorkoutLogger'
 import ChatPage from './pages/ChatPage'
 import Challenges from './pages/Challenges'
 import LeaderboardPage from './pages/LeaderboardPage'
+import Progress from './pages/Progress'
 import Layout from './components/Layout'
 
 function PrivateRoute({ children }) {
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="chat" element={<ChatPage />} />
         <Route path="challenges" element={<Challenges />} />
         <Route path="challenges/:id/leaderboard" element={<LeaderboardPage />} />
+        <Route path="progress" element={<Progress />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
