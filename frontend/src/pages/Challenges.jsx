@@ -48,7 +48,7 @@ export default function Challenges() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-full">
-      <div className="w-6 h-6 border-2 border-[#c8ff2e] border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#ff6500] border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
@@ -62,7 +62,7 @@ export default function Challenges() {
         <button
           onClick={() => setShowForm(v => !v)}
           className="px-4 py-2 rounded-xl text-black text-sm font-semibold"
-          style={{ backgroundColor: '#c8ff2e' }}
+          style={{ backgroundColor: '#ff6500' }}
         >
           + Create
         </button>
@@ -77,14 +77,14 @@ export default function Challenges() {
               value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               required
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#c8ff2e]/50"
+              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50"
             />
             <textarea
               placeholder="Description"
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               rows={2}
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#c8ff2e]/50 resize-none"
+              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 resize-none"
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -116,7 +116,7 @@ export default function Challenges() {
                 value={form.end_date}
                 onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))}
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#c8ff2e]/50"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6500]/50"
               />
             </div>
             {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -124,7 +124,7 @@ export default function Challenges() {
               type="submit"
               disabled={creating}
               className="py-3 rounded-xl font-semibold text-black text-sm disabled:opacity-50"
-              style={{ backgroundColor: '#c8ff2e' }}
+              style={{ backgroundColor: '#ff6500' }}
             >
               {creating ? 'Creating...' : 'Create Challenge'}
             </button>
@@ -160,7 +160,7 @@ export default function Challenges() {
                     onClick={() => join(c.id)}
                     disabled={joining === c.id}
                     className="px-3 py-1.5 rounded-lg text-xs font-medium text-black disabled:opacity-50"
-                    style={{ backgroundColor: '#c8ff2e' }}
+                    style={{ backgroundColor: '#ff6500' }}
                   >
                     {joining === c.id ? '...' : 'Join'}
                   </button>

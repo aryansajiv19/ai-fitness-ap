@@ -1,7 +1,7 @@
 import React from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 
-const LIME = '#c8ff2e'
+const LIME = '#ff6500'
 
 export default function Layout() {
   const navigate = useNavigate()
@@ -14,7 +14,7 @@ export default function Layout() {
 
   const linkClass = ({ isActive }) =>
     `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-      isActive ? 'text-[#c8ff2e] bg-[#c8ff2e]/10' : 'text-zinc-400 hover:text-white hover:bg-white/5'
+      isActive ? 'text-[#ff6500] bg-[#ff6500]/10' : 'text-zinc-400 hover:text-white hover:bg-white/5'
     }`
 
   return (

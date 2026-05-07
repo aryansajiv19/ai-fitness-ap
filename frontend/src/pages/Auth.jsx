@@ -36,7 +36,7 @@ export default function Auth() {
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-black tracking-tight" style={{ color: '#c8ff2e' }}>ASCEND</h1>
+          <h1 className="text-4xl font-black tracking-tight" style={{ color: '#ff6500' }}>ASCEND</h1>
           <p className="text-zinc-500 mt-2 text-sm">Your AI-powered training coach</p>
         </div>
 
@@ -51,7 +51,7 @@ export default function Auth() {
                     ? 'text-black font-semibold'
                     : 'text-zinc-500 hover:text-white bg-transparent'
                 }`}
-                style={mode === m ? { backgroundColor: '#c8ff2e' } : {}}
+                style={mode === m ? { backgroundColor: '#ff6500' } : {}}
               >
                 {m}
               </button>
@@ -65,7 +65,7 @@ export default function Auth() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#c8ff2e]/50 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 transition-colors"
             />
             <input
               type="password"
@@ -73,16 +73,16 @@ export default function Auth() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#c8ff2e]/50 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 transition-colors"
             />
             {error && (
-              <p className={`text-sm ${error.includes('created') ? 'text-[#c8ff2e]' : 'text-red-400'}`}>{error}</p>
+              <p className={`text-sm ${error.includes('created') ? 'text-[#ff6500]' : 'text-red-400'}`}>{error}</p>
             )}
             <button
               type="submit"
               disabled={loading}
               className="w-full py-3 rounded-xl font-semibold text-black text-sm transition-opacity disabled:opacity-50"
-              style={{ backgroundColor: '#c8ff2e' }}
+              style={{ backgroundColor: '#ff6500' }}
             >
               {loading ? '...' : mode === 'login' ? 'Sign in' : 'Create account'}
             </button>

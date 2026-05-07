@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 const MUSCLES = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core']
 
 function RecoveryBar({ muscle, pct }) {
-  const color = pct >= 70 ? '#c8ff2e' : pct >= 40 ? '#facc15' : '#ef4444'
+  const color = pct >= 70 ? '#ff6500' : pct >= 40 ? '#facc15' : '#ef4444'
   return (
     <div>
       <div className="flex justify-between text-xs mb-1">
@@ -54,7 +54,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="w-6 h-6 border-2 border-[#c8ff2e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#ff6500] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -86,9 +86,9 @@ export default function Dashboard() {
                 <Tooltip
                   contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8 }}
                   labelStyle={{ color: '#fff' }}
-                  itemStyle={{ color: '#c8ff2e' }}
+                  itemStyle={{ color: '#ff6500' }}
                 />
-                <Bar dataKey="volume" fill="#c8ff2e" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="volume" fill="#ff6500" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -111,10 +111,10 @@ export default function Dashboard() {
       <div className="bg-[#111] border border-white/5 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-white">Recent Workouts</h2>
-          <Link to="/log" className="text-xs text-[#c8ff2e] hover:underline">+ Log new</Link>
+          <Link to="/log" className="text-xs text-[#ff6500] hover:underline">+ Log new</Link>
         </div>
         {workouts.length === 0 ? (
-          <p className="text-zinc-600 text-sm text-center py-6">No workouts yet. <Link to="/log" className="text-[#c8ff2e]">Log your first one.</Link></p>
+          <p className="text-zinc-600 text-sm text-center py-6">No workouts yet. <Link to="/log" className="text-[#ff6500]">Log your first one.</Link></p>
         ) : (
           <div className="flex flex-col gap-2">
             {workouts.slice(0, 6).map(w => (

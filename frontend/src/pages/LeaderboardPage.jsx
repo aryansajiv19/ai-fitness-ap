@@ -30,7 +30,7 @@ export default function LeaderboardPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-full">
-      <div className="w-6 h-6 border-2 border-[#c8ff2e] border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-[#ff6500] border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
@@ -41,7 +41,7 @@ export default function LeaderboardPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-[#c8ff2e] rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-[#ff6500] rounded-full animate-pulse" />
             <span className="text-xs text-zinc-500">Live</span>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function LeaderboardPage() {
             <div
               key={entry.user_id}
               className={`bg-[#111] border rounded-2xl p-5 flex items-center gap-4 ${
-                i === 0 ? 'border-[#c8ff2e]/30' : 'border-white/5'
+                i === 0 ? 'border-[#ff6500]/30' : 'border-white/5'
               }`}
             >
               <div className="text-2xl w-8 text-center">{medal[i] || `${i + 1}`}</div>
@@ -72,7 +72,7 @@ export default function LeaderboardPage() {
                 </p>
               </div>
               {i === 0 && (
-                <div className="text-xs font-bold px-2 py-1 rounded-full text-black" style={{ backgroundColor: '#c8ff2e' }}>
+                <div className="text-xs font-bold px-2 py-1 rounded-full text-black" style={{ backgroundColor: '#ff6500' }}>
                   #1
                 </div>
               )}

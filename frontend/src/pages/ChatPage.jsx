@@ -66,7 +66,7 @@ export default function ChatPage() {
                   ? 'text-black font-medium'
                   : 'bg-[#111] border border-white/5 text-zinc-200'
               }`}
-              style={msg.role === 'user' ? { backgroundColor: '#c8ff2e' } : {}}
+              style={msg.role === 'user' ? { backgroundColor: '#ff6500' } : {}}
             >
               {msg.text || (msg.streaming ? <span className="animate-pulse">▋</span> : '')}
             </div>
@@ -82,7 +82,7 @@ export default function ChatPage() {
             <button
               key={s}
               onClick={() => setInput(s)}
-              className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-zinc-400 hover:text-white hover:border-[#c8ff2e]/30 transition-colors"
+              className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-zinc-400 hover:text-white hover:border-[#ff6500]/30 transition-colors"
             >
               {s}
             </button>
@@ -97,13 +97,13 @@ export default function ChatPage() {
           onChange={e => setInput(e.target.value)}
           placeholder="Ask your coach anything..."
           disabled={loading}
-          className="flex-1 bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#c8ff2e]/50 disabled:opacity-50"
+          className="flex-1 bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={loading || !input.trim()}
           className="px-5 py-3 rounded-xl font-semibold text-black text-sm disabled:opacity-40 transition-opacity"
-          style={{ backgroundColor: '#c8ff2e' }}
+          style={{ backgroundColor: '#ff6500' }}
         >
           {loading ? '...' : 'Send'}
         </button>

@@ -63,7 +63,7 @@ export default function WorkoutLogger() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
               tab === t ? 'text-black' : 'text-zinc-400 bg-white/5 hover:text-white'
             }`}
-            style={tab === t ? { backgroundColor: '#c8ff2e' } : {}}
+            style={tab === t ? { backgroundColor: '#ff6500' } : {}}
           >
             {t === 'voice' ? '🎙 Voice / Text' : '📝 Manual'}
           </button>
@@ -80,7 +80,7 @@ export default function WorkoutLogger() {
                 onChange={e => setForm(f => ({ ...f, exercise: e.target.value }))}
                 placeholder="e.g. Bench Press"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#c8ff2e]/50"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50"
               />
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -94,7 +94,7 @@ export default function WorkoutLogger() {
                     required
                     min="0"
                     step={field === 'weight' ? '0.5' : '1'}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-[#c8ff2e]/50"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-[#ff6500]/50"
                   />
                 </div>
               ))}
@@ -104,18 +104,18 @@ export default function WorkoutLogger() {
               <select
                 value={form.muscle_group}
                 onChange={e => setForm(f => ({ ...f, muscle_group: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#c8ff2e]/50"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6500]/50"
               >
                 {MUSCLES.map(m => <option key={m} value={m} className="bg-[#111] capitalize">{m}</option>)}
               </select>
             </div>
             {error && <p className="text-red-400 text-sm">{error}</p>}
-            {success && <p className="text-[#c8ff2e] text-sm">{success}</p>}
+            {success && <p className="text-[#ff6500] text-sm">{success}</p>}
             <button
               type="submit"
               disabled={loading}
               className="py-3 rounded-xl font-semibold text-black text-sm disabled:opacity-50"
-              style={{ backgroundColor: '#c8ff2e' }}
+              style={{ backgroundColor: '#ff6500' }}
             >
               {loading ? 'Logging...' : 'Log Workout'}
             </button>
@@ -130,11 +130,11 @@ export default function WorkoutLogger() {
                 placeholder='e.g. "bench press 3 sets of 10 at 80 kilos" or "squatted 100kg for 5x5"'
                 required
                 rows={4}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#c8ff2e]/50 resize-none"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#ff6500]/50 resize-none"
               />
             </div>
             {error && <p className="text-red-400 text-sm">{error}</p>}
-            {success && <p className="text-[#c8ff2e] text-sm">{success}</p>}
+            {success && <p className="text-[#ff6500] text-sm">{success}</p>}
             {parsed && (
               <div className="bg-white/5 rounded-xl p-4 text-sm">
                 <p className="text-zinc-400 mb-2 text-xs uppercase tracking-wider">Parsed as:</p>
@@ -152,7 +152,7 @@ export default function WorkoutLogger() {
               type="submit"
               disabled={loading}
               className="py-3 rounded-xl font-semibold text-black text-sm disabled:opacity-50"
-              style={{ backgroundColor: '#c8ff2e' }}
+              style={{ backgroundColor: '#ff6500' }}
             >
               {loading ? 'Parsing with AI...' : '🤖 Parse & Log'}
             </button>

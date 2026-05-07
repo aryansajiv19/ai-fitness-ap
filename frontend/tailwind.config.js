@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        lime: {
-          accent: '#c8ff2e',
+        orange: {
+          accent: '#ff6500',
         }
       }
     },
