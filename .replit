@@ -11,6 +11,9 @@ channel = "stable-25_05"
 [userenv.shared]
 JWT_SECRET = "953d9c90449301b6a110fde143b91ece7240623805681350162bba4b32ba58a915608c51a636de6aaa716e3ad70c6e6abd6d406849f72371323010c6e781e21b"
 
+[userenv.production]
+PORT = "5001"
+
 [workflows]
 runButton = "Project"
 
