@@ -1,0 +1,40 @@
+I'm continuing a Node.js + Express + PostgreSQL fitness app called REPMAX. Here's what's already built and working:
+Already done (don't rebuild):
+
+Express server with PostgreSQL connection
+JWT authentication with bcrypt (signup, login, middleware-protected routes)
+Workout CRUD with user_id linking (workouts table has: id, exercise, sets, reps, weight, muscle_group, user_id, created_at)
+Recovery score system at GET /api/recovery (calculates 0-100% per muscle group based on last 7 days of workouts)
+Social challenges system (create, list, join challenges)
+Leaderboard at GET /api/leaderboard/:id (calculated live from workout data)
+
+File structure:
+
+server.js (main entry)
+db.js (postgres pool)
+setup.js (creates tables)
+auth.js (signup/login routes)
+middleware.js (JWT auth check)
+recovery.js, challenges.js, leaderboard.js (route files)
+
+What I need you to build:
+
+WebSockets using socket.io for real-time leaderboard updates. When anyone logs a workout that affects a leaderboard, push the updated leaderboard to all connected clients viewing that challenge.
+AI integration using the Anthropic API. Create POST /api/chat that takes a question, fetches the user's recent workouts and recovery data as context, sends it to Claude, and returns the response. Also support streaming responses. Use Claude Sonnet 4 (model: claude-sonnet-4-20250514).
+pgvector for semantic search. Add an embedding column to the workouts table. When a workout is created, generate an embedding using OpenAI's text-embedding-3-small. Add GET /api/workouts/search?q=... that does cosine similarity search.
+Voice logging at POST /api/workouts/voice. Accept either audio (transcribe with Whisper) or text. Use Claude to parse natural language like "bench press 3 sets of 10 at 80 kilos" into structured workout data, then save it like the regular workout endpoint.
+React frontend in a /frontend folder using Vite. Pages needed:
+
+Login / Signup
+Dashboard (recovery body map, recent workouts, AI chat panel, stats cards, progress charts)
+Workout logger (manual form + voice button)
+Full AI chat page
+Challenges list + create challenge form
+Leaderboard view per challenge
+
+Use Tailwind CSS. Dark theme with lime accent color (#c8ff2e). Modern, clean design. Use shadcn/ui or similar component patterns.
+Frontend API wiring — every page should fetch real data from the backend with proper loading states and error handling. Store the JWT token in localStorage and send it with every request.
+Dockerize with a Dockerfile for the backend and a docker-compose.yml that runs the backend, PostgreSQL with pgvector extension, and the React frontend together.
+Deploy to Replit. Make sure environment variables are set up properly (JWT_SECRET, ANTHROPIC_API_KEY, OPENAI_API_KEY, DATABASE_URL).
+
+After each major feature, tell me what was added and verify it works end to end.
