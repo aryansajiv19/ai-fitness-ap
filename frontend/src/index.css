@@ -407,3 +407,114 @@ h1.page-title em { font-style: normal; color: var(--accent); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── Mobile ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Layout: stack sidebar below content as bottom nav */
+  .app { flex-direction: column; }
+
+  aside.nav {
+    width: 100%; height: auto;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    top: auto; z-index: 200;
+    flex-direction: row; align-items: center;
+    padding: 0; border-right: none;
+    border-top: 1px solid var(--rule);
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-mark { display: none; }
+  .nav-foot { display: none; }
+
+  .nav-list {
+    flex-direction: row; gap: 0;
+    width: 100%; overflow-x: auto;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .nav-list::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    flex-direction: column; gap: 2px;
+    padding: 10px 12px; font-size: 9px;
+    letter-spacing: 0.06em; white-space: nowrap;
+    flex: 1; justify-content: center; align-items: center;
+    text-align: center;
+  }
+  .nav-link::before { display: none; }
+  .nav-link:hover { padding-left: 12px; }
+  .nav-link.active { padding-left: 12px; color: var(--accent); }
+  .nav-link .num { width: auto; font-size: 9px; color: var(--fg-faint); }
+  .nav-link.active .num { color: var(--accent); }
+
+  /* Main content: full width, bottom padding for nav bar */
+  main.canvas {
+    width: 100%; height: auto;
+    padding: 24px 20px 90px;
+    overflow-y: visible;
+  }
+
+  /* Page header */
+  .page-head { flex-direction: column; gap: 8px; margin-bottom: 28px; }
+  h1.page-title { font-size: clamp(28px, 8vw, 42px); }
+
+  /* Stats: single column */
+  .stats-row { grid-template-columns: 1fr; gap: 0; margin-bottom: 32px; }
+  .stat { padding: 20px 0; border-right: none; border-bottom: 1px solid var(--rule); }
+  .stat:nth-child(2) { padding-left: 0; }
+  .stat:nth-child(3) { padding-left: 0; border-right: none; border-bottom: none; }
+  .stat .val { font-size: clamp(32px, 8vw, 48px); }
+
+  /* Dashboard grid: single column */
+  .dash-grid { grid-template-columns: 1fr; gap: 40px; }
+
+  /* 3-col form grids: single column */
+  .grid-3 { grid-template-columns: 1fr; gap: 0; }
+
+  /* Workout rows */
+  .wo { grid-template-columns: 20px 1fr auto; gap: 10px; }
+  .wo-name { font-size: 18px; }
+  .wo-meta .vol { font-size: 12px; }
+
+  /* Leaderboard */
+  .lb-row { grid-template-columns: 32px 1fr auto; gap: 12px; }
+  .lb-best { display: none; }
+  .lb-rank { font-size: 26px; }
+  .lb-name { font-size: 18px; }
+
+  /* Chat */
+  .chat-shell { max-width: 100%; }
+  .msg-body { font-size: 16px; }
+  .suggestions { gap: 6px; }
+  .sugg { font-size: 9px; padding: 7px 10px; }
+
+  /* Challenges */
+  .ch-desc { max-width: 100%; }
+  .ch-head-row { flex-direction: column; gap: 12px; }
+  .ch-foot-row { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .ch-name { font-size: clamp(20px, 5vw, 28px); }
+
+  /* Auth */
+  .auth-wrap { margin: 40px 20px; max-width: 100%; }
+  .auth-mark { font-size: 48px; }
+
+  /* Search */
+  .search-wrap { max-width: 100%; }
+  .search-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .search-meta { flex-wrap: wrap; }
+
+  /* Form wrap */
+  .form-wrap { max-width: 100%; }
+
+  /* PR rows */
+  .pr-row { grid-template-columns: 1fr auto; gap: 12px; }
+  .pr-date { display: none; }
+
+  /* Ambient glows smaller on mobile */
+  .ambient .g1 { width: 300px; height: 300px; }
+  .ambient .g2 { width: 250px; height: 250px; }
+
+  /* Cursor glow off on touch */
+  .cursor-glow { display: none; }
+}
