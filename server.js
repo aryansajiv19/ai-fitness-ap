@@ -1,6 +1,7 @@
 require("dotenv").config()
 const express = require("express")
 const http = require("http")
+const path = require("path")
 const { Server } = require("socket.io")
 const pool = require('./db')
 const authRoutes = require("./auth")
@@ -138,6 +139,14 @@ async function getLeaderboardData(challengeId) {
     return result.rows
 }
 
-server.listen(3000, () => {
-    console.log("Server running on port 3000")
+// Serve built React frontend in production
+const distPath = path.join(__dirname, "frontend", "dist")
+app.use(express.static(distPath))
+app.get("*", (req, res) => {
+    res.sendFile(path.join(distPath, "index.html"))
+})
+
+const PORT = process.env.PORT || 3000
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
 })
