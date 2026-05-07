@@ -6,8 +6,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-ff6500?style=flat-square)
 
-> **Screenshot:** _(replace with real dashboard image)_
-> ![Dashboard placeholder](https://placehold.co/1200x600/000000/ff6500?text=ASCEND+Dashboard)
+![ASCEND Dashboard](./docs/dashboard.png)
 
 ---
 
